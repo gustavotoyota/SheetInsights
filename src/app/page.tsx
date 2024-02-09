@@ -3,6 +3,12 @@
 import { Api } from "@/app-specific/api";
 import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
 import Query, { IQuery } from "@/components/Query";
+import {
+  leanClone,
+  leanCloneThenSet,
+  leanCloneThenPush,
+  leanCloneThenSwap,
+} from "@/misc/lean-clone";
 import csvParser from "csv-parser";
 import { useEffect, useRef, useState } from "react";
 import { Readable } from "stream";
@@ -11,7 +17,7 @@ export default function Home() {
   const [sheetData, setSheetData] = useAppIndexedDB("sheetData", () => "");
 
   const [queries, setQueries] = useAppIndexedDB<IQuery[]>("queries", () => [
-    { id: crypto.randomUUID(), enabled: true, value: "" },
+    { id: crypto.randomUUID(), title: "", enabled: true, value: "" },
   ]);
   const [result, setResult] = useState("");
 
@@ -170,10 +176,14 @@ export default function Home() {
             Queries (use {"{{column}}"} to place column values):{" "}
             <button
               onClick={() => {
-                setQueries((queries) => [
-                  ...queries,
-                  { id: crypto.randomUUID(), enabled: true, value: "" },
-                ]);
+                setQueries(
+                  leanCloneThenPush(queries, [], {
+                    id: crypto.randomUUID(),
+                    title: "",
+                    enabled: true,
+                    value: "",
+                  })
+                );
               }}
               className="p-1 border border-black rounded-md bg-neutral-300"
             >
@@ -183,28 +193,44 @@ export default function Home() {
 
           {queries.map((query, index) => (
             <Query
+              key={query.id}
+              title={query.title}
               enabled={query.enabled}
-              text={query.value}
-              onChange={(text) => {
-                const newQueries = [...queries];
-                newQueries[index].value = text;
-                setQueries(newQueries);
+              value={query.value}
+              onTitleChange={(title) => {
+                setQueries(leanCloneThenSet(queries, [index], "title", title));
+              }}
+              onValueChange={(value) => {
+                setQueries(leanCloneThenSet(queries, [index], "value", value));
               }}
               onToggleEnabled={(enabled) => {
-                const newQueries = [...queries];
-                newQueries[index].enabled = enabled;
-                setQueries(newQueries);
+                setQueries(
+                  leanCloneThenSet(queries, [index], "enabled", enabled)
+                );
+              }}
+              onMoveUp={() => {
+                if (index === 0) {
+                  return;
+                }
+
+                setQueries(leanCloneThenSwap(queries, [], index, index - 1));
+              }}
+              onMoveDown={() => {
+                if (index === queries.length - 1) {
+                  return;
+                }
+
+                setQueries(leanCloneThenSwap(queries, [], index, index + 1));
               }}
               onDelete={() => {
                 if (queries.length === 1) {
                   return;
                 }
 
-                const newQueries = [...queries];
+                const newQueries = leanClone(queries);
                 newQueries.splice(index, 1);
                 setQueries(newQueries);
               }}
-              key={index}
             />
           ))}
 
@@ -249,9 +275,9 @@ export default function Home() {
               type="text"
               value={apis[apiIndex].url}
               onChange={(event) => {
-                const newApis = [...apis];
-                newApis[apiIndex].url = event.target.value;
-                setApis(newApis);
+                setApis(
+                  leanCloneThenSet(apis, [apiIndex], "url", event.target.value)
+                );
               }}
               className="p-1 border border-black rounded-md resize-none bg-neutral-300"
             />
@@ -266,10 +292,11 @@ export default function Home() {
               type="password"
               value={apis[apiIndex].key}
               onChange={(event) => {
-                const newApis = [...apis];
-                newApis[apiIndex].key = event.target.value;
-                setApis(newApis);
+                setApis(
+                  leanCloneThenSet(apis, [apiIndex], "key", event.target.value)
+                );
               }}
+              placeholder={`Generate your ${apis[apiIndex].name} API key and paste it here.`}
               className="p-1 border border-black rounded-md resize-none bg-neutral-300"
             />
           </div>
@@ -283,9 +310,14 @@ export default function Home() {
               className="p-1 border border-black rounded-md bg-neutral-300"
               value={apis[apiIndex].selectedModel}
               onChange={(event) => {
-                const newApis = [...apis];
-                newApis[apiIndex].selectedModel = event.target.value;
-                setApis(newApis);
+                setApis(
+                  leanCloneThenSet(
+                    apis,
+                    [apiIndex],
+                    "selectedModel",
+                    event.target.value
+                  )
+                );
               }}
             >
               {apis[apiIndex].models.map((model, index) => (
