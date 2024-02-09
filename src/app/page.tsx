@@ -26,17 +26,11 @@ export default function Home() {
 
   const resultRef = useRef<HTMLTextAreaElement>(null);
 
-  const isInitialMount = useRef(true);
-
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      if (resultRef.current) {
-        resultRef.current.scrollTop = resultRef.current.scrollHeight;
-      }
+    if (resultRef.current) {
+      resultRef.current.scrollTop = resultRef.current.scrollHeight;
     }
-  }, []);
+  }, [result]);
 
   function processSheet() {
     const rows: any[] = [];
