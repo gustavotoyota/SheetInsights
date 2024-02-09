@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
-import Query from "@/components/Query";
+import Query, { IQuery } from "@/components/Query";
 import csvParser from "csv-parser";
 import { useEffect, useRef, useState } from "react";
 import { Readable } from "stream";
@@ -9,8 +9,8 @@ import { Readable } from "stream";
 export default function Home() {
   const [sheetData, setSheetData] = useAppIndexedDB("sheetData", () => "");
 
-  const [queries, setQueries] = useAppIndexedDB<string[]>("queries", () => [
-    "",
+  const [queries, setQueries] = useAppIndexedDB<IQuery[]>("queries", () => [
+    { enabled: true, value: "" },
   ]);
   const [result, setResult] = useState("");
 
@@ -49,11 +49,20 @@ export default function Home() {
 
         setProgress(`0/${rows.length}`);
 
+        const lastEnabledQueryIdx = queries
+          .map((query, index) => (query.enabled ? index : -1))
+          .filter((index) => index !== -1)
+          .at(-1);
+
         for (const [rowIdx, row] of Array.from(rows.entries())) {
           for (const [queryIdx, query] of Array.from(queries.entries())) {
+            if (!query.enabled) {
+              continue;
+            }
+
             const startTime = Date.now();
 
-            let finalQuery = query;
+            let finalQuery = query.value;
 
             for (const key in row) {
               finalQuery = finalQuery.replace(`{{${key}}}`, row[key]);
@@ -98,7 +107,7 @@ export default function Home() {
                 `${result}"${data.choices[0].message.content
                   .trim()
                   .replaceAll('"', '""')}"${
-                  queryIdx === queries.length - 1 ? "\n" : "\t"
+                  queryIdx === lastEnabledQueryIdx ? "\n" : "\t"
                 }`
             );
 
@@ -130,7 +139,10 @@ export default function Home() {
             Queries (use {"{{column}}"} to place column values):{" "}
             <button
               onClick={() => {
-                setQueries((queries) => [...queries, ""]);
+                setQueries((queries) => [
+                  ...queries,
+                  { enabled: true, value: "" },
+                ]);
               }}
               className="p-1 border border-black rounded-md bg-neutral-300"
             >
@@ -140,10 +152,16 @@ export default function Home() {
 
           {queries.map((query, index) => (
             <Query
-              text={query}
+              enabled={query.enabled}
+              text={query.value}
               onChange={(text) => {
                 const newQueries = [...queries];
-                newQueries[index] = text;
+                newQueries[index].value = text;
+                setQueries(newQueries);
+              }}
+              onToggleEnabled={(enabled) => {
+                const newQueries = [...queries];
+                newQueries[index].enabled = enabled;
                 setQueries(newQueries);
               }}
               onDelete={() => {
