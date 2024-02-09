@@ -170,7 +170,7 @@ export default function Home() {
     <main>
       <div className="container mx-auto">
         <div className="p-4 flex flex-col">
-          <div>CSV data with headers:</div>
+          <div>CSV data (with headers):</div>
 
           <textarea
             value={sheetData}
