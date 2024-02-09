@@ -74,8 +74,7 @@ export default function Home() {
                 messages: [
                   {
                     role: "system",
-                    content:
-                      "You are a helpful assistant. Keep your responses limited to one short paragraph if possible.",
+                    content: systemPrompt,
                   },
                   {
                     role: "user",
