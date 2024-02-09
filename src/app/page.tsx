@@ -1,52 +1,23 @@
 "use client";
 
+import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
 import Query from "@/components/Query";
 import csvParser from "csv-parser";
 import { useEffect, useRef, useState } from "react";
 import { Readable } from "stream";
 
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function useLocalStorage<T>(
-  key: string,
-  initialValue: () => T
-): [T, (value: T | ((oldValue: T) => T)) => void] {
-  const [value, setValue] = useState(() => {
-    const item =
-      typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
-
-    if (item) {
-      try {
-        return JSON.parse(item);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    return initialValue();
-  });
-
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-
-  return [value, setValue] as const;
-}
-
 export default function Home() {
-  const [sheetData, setSheetData] = useState("");
+  const [sheetData, setSheetData] = useAppIndexedDB("sheetData", () => "");
 
-  const [queries, setQueries] = useLocalStorage<string[]>("queries", () => [
+  const [queries, setQueries] = useAppIndexedDB<string[]>("queries", () => [
     "",
   ]);
   const [result, setResult] = useState("");
 
-  const [apiUrl, setApiUrl] = useLocalStorage("apiURL", () => "");
-  const [apiToken, setApiToken] = useLocalStorage("apiToken", () => "");
-  const [model, setModel] = useLocalStorage("model", () => "");
-  const [systemPrompt, setSystemPrompt] = useLocalStorage(
+  const [apiUrl, setApiUrl] = useAppIndexedDB("apiURL", () => "");
+  const [apiToken, setApiToken] = useAppIndexedDB("apiToken", () => "");
+  const [model, setModel] = useAppIndexedDB("model", () => "");
+  const [systemPrompt, setSystemPrompt] = useAppIndexedDB(
     "systemPrompt",
     () => "You are a helpful AI assistant."
   );
@@ -65,7 +36,7 @@ export default function Home() {
         resultRef.current.scrollTop = resultRef.current.scrollHeight;
       }
     }
-  });
+  }, []);
 
   function processSheet() {
     const rows: any[] = [];
