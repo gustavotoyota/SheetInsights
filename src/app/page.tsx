@@ -63,7 +63,11 @@ export default function Home() {
       key: "",
       models: [
         "codellama-7b-instruct-fp16",
+        "codellama-13b-instruct-fp16",
+        "codellama-34b-instruct-fp16",
+        "codellama-70b-instruct-fp16",
         "llama-2-13b-chat-fp16",
+        "llama-2-70b-chat-fp16",
         "llamaguard-7b-fp16",
         "mistral-7b-instruct-fp16",
         "mixtral-8x7b-instruct-fp16",
