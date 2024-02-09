@@ -17,7 +17,13 @@ export default function Home() {
   const [sheetData, setSheetData] = useAppIndexedDB("sheetData", () => "");
 
   const [queries, setQueries] = useAppIndexedDB<IQuery[]>("queries", () => [
-    { id: crypto.randomUUID(), title: "", enabled: true, value: "" },
+    {
+      id: crypto.randomUUID(),
+      title: "",
+      expanded: true,
+      enabled: true,
+      value: "",
+    },
   ]);
   const [result, setResult] = useState("");
 
@@ -180,6 +186,7 @@ export default function Home() {
                   leanCloneThenPush(queries, [], {
                     id: crypto.randomUUID(),
                     title: "",
+                    expanded: true,
                     enabled: true,
                     value: "",
                   })
@@ -195,6 +202,7 @@ export default function Home() {
             <Query
               key={query.id}
               title={query.title}
+              expanded={query.expanded}
               enabled={query.enabled}
               value={query.value}
               onTitleChange={(title) => {
@@ -202,6 +210,11 @@ export default function Home() {
               }}
               onValueChange={(value) => {
                 setQueries(leanCloneThenSet(queries, [index], "value", value));
+              }}
+              onToggleExpanded={(expanded) => {
+                setQueries(
+                  leanCloneThenSet(queries, [index], "expanded", expanded)
+                );
               }}
               onToggleEnabled={(enabled) => {
                 setQueries(
