@@ -347,7 +347,7 @@ export default function Home() {
             className="p-2 bg-neutral-300 rounded-md"
             onClick={processSheet}
           >
-            Process data
+            Extract insights
           </button>
         </div>
 
@@ -361,7 +361,7 @@ export default function Home() {
             readOnly
             value={result}
             className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
-            placeholder="Process the data to see the result here."
+            placeholder="Insights go here."
           ></textarea>
         </div>
       </div>
