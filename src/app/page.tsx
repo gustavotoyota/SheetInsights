@@ -3,12 +3,8 @@
 import { Api } from "@/app-specific/api";
 import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
 import Query, { IQuery } from "@/components/Query";
-import {
-  leanClone,
-  leanCloneThenSet,
-  leanCloneThenPush,
-  leanCloneThenSwap,
-} from "@/misc/lean-clone";
+import { leanClone, leanCloneThen } from "@/misc/lean-clone";
+import { swap } from "@/misc/swap";
 import csvParser from "csv-parser";
 import { useEffect, useRef, useState } from "react";
 import { Readable } from "stream";
@@ -187,13 +183,15 @@ export default function Home() {
             <button
               onClick={() => {
                 setQueries(
-                  leanCloneThenPush(queries, [], {
-                    id: crypto.randomUUID(),
-                    title: "",
-                    expanded: true,
-                    enabled: true,
-                    value: "",
-                  })
+                  leanCloneThen(queries, [], (queries) =>
+                    queries.push({
+                      id: crypto.randomUUID(),
+                      title: "",
+                      expanded: true,
+                      enabled: true,
+                      value: "",
+                    })
+                  )
                 );
               }}
               className="p-1 border border-black rounded-md bg-neutral-300"
@@ -210,19 +208,39 @@ export default function Home() {
               enabled={query.enabled}
               value={query.value}
               onTitleChange={(title) => {
-                setQueries(leanCloneThenSet(queries, [index], "title", title));
+                setQueries(
+                  leanCloneThen(
+                    queries,
+                    [index],
+                    (query) => (query.title = title)
+                  )
+                );
               }}
               onValueChange={(value) => {
-                setQueries(leanCloneThenSet(queries, [index], "value", value));
+                setQueries(
+                  leanCloneThen(
+                    queries,
+                    [index],
+                    (query) => (query.value = value)
+                  )
+                );
               }}
               onToggleExpanded={(expanded) => {
                 setQueries(
-                  leanCloneThenSet(queries, [index], "expanded", expanded)
+                  leanCloneThen(
+                    queries,
+                    [index],
+                    (query) => (query.expanded = expanded)
+                  )
                 );
               }}
               onToggleEnabled={(enabled) => {
                 setQueries(
-                  leanCloneThenSet(queries, [index], "enabled", enabled)
+                  leanCloneThen(
+                    queries,
+                    [index],
+                    (query) => (query.enabled = enabled)
+                  )
                 );
               }}
               onMoveUp={() => {
@@ -230,23 +248,33 @@ export default function Home() {
                   return;
                 }
 
-                setQueries(leanCloneThenSwap(queries, [], index, index - 1));
+                setQueries(
+                  leanCloneThen(queries, [], (queries) =>
+                    swap(queries, index, index - 1)
+                  )
+                );
               }}
               onMoveDown={() => {
                 if (index === queries.length - 1) {
                   return;
                 }
 
-                setQueries(leanCloneThenSwap(queries, [], index, index + 1));
+                setQueries(
+                  leanCloneThen(queries, [], (queries) =>
+                    swap(queries, index, index + 1)
+                  )
+                );
               }}
               onDelete={() => {
                 if (queries.length === 1) {
                   return;
                 }
 
-                const newQueries = leanClone(queries);
-                newQueries.splice(index, 1);
-                setQueries(newQueries);
+                setQueries(
+                  leanCloneThen(queries, [], (queries) =>
+                    queries.splice(index, 1)
+                  )
+                );
               }}
             />
           ))}
@@ -293,7 +321,11 @@ export default function Home() {
               value={apis[apiIndex].url}
               onChange={(event) => {
                 setApis(
-                  leanCloneThenSet(apis, [apiIndex], "url", event.target.value)
+                  leanCloneThen(
+                    apis,
+                    [apiIndex],
+                    (api) => (api.url = event.target.value)
+                  )
                 );
               }}
               className="p-1 border border-black rounded-md resize-none bg-neutral-300"
@@ -310,7 +342,11 @@ export default function Home() {
               value={apis[apiIndex].key}
               onChange={(event) => {
                 setApis(
-                  leanCloneThenSet(apis, [apiIndex], "key", event.target.value)
+                  leanCloneThen(
+                    apis,
+                    [apiIndex],
+                    (api) => (api.key = event.target.value)
+                  )
                 );
               }}
               placeholder={`Generate your ${apis[apiIndex].name} API key and paste it here.`}
@@ -328,11 +364,10 @@ export default function Home() {
               value={apis[apiIndex].selectedModel}
               onChange={(event) => {
                 setApis(
-                  leanCloneThenSet(
+                  leanCloneThen(
                     apis,
                     [apiIndex],
-                    "selectedModel",
-                    event.target.value
+                    (api) => (api.selectedModel = event.target.value)
                   )
                 );
               }}

@@ -6,87 +6,58 @@ export type NestedObjPaths<T> = {
     : never;
 }[keyof T];
 
+export type NestedValueType<T, K extends any[]> = K extends [
+  infer F,
+  ...infer R
+]
+  ? F extends keyof T
+    ? R extends any[]
+      ? NestedValueType<T[F], R>
+      : T[F]
+    : never
+  : T;
+
 export function leanClone<T extends object>(
   obj: T,
   path?: NestedObjPaths<T> | []
 ): T {
-  const clonedRoot = Array.isArray(obj) ? [...obj] : { ...obj };
+  const clonedRoot = (Array.isArray(obj) ? [...obj] : { ...obj }) as T;
 
   if (!path) {
-    return clonedRoot as any;
+    return clonedRoot;
   }
 
-  let currentLevel: any = clonedRoot;
+  let currentObj: any = clonedRoot;
 
   for (let i = 0; i < path.length; i++) {
     const prop = path[i];
 
-    if (Array.isArray(currentLevel[prop])) {
-      currentLevel[prop] = [...currentLevel[prop]];
+    if (Array.isArray(currentObj[prop])) {
+      currentObj[prop] = [...currentObj[prop]];
     } else {
-      currentLevel[prop] = { ...currentLevel[prop] };
+      currentObj[prop] = { ...currentObj[prop] };
     }
 
-    currentLevel = currentLevel[prop];
+    currentObj = currentObj[prop];
   }
 
-  return clonedRoot as any;
+  return clonedRoot;
 }
 
-export function leanCloneThenSet<T extends object>(
-  obj: T,
-  path: NestedObjPaths<T>,
-  key: any,
-  value: any
-): T {
+export function leanCloneThen<
+  Obj extends object,
+  Path extends NestedObjPaths<Obj> | [],
+  TargetObj extends NestedValueType<Obj, Path>
+>(obj: Obj, path: Path, func: (targetObj: TargetObj, obj: Obj) => void): Obj {
   const clonedObj = leanClone(obj, path as any);
 
-  let currentLevel: any = clonedObj;
+  let currentObj: any = clonedObj;
 
   for (let i = 0; i < path.length; i++) {
-    currentLevel = currentLevel[path[i]];
+    currentObj = currentObj[path[i]];
   }
 
-  currentLevel[key] = value;
-
-  return clonedObj;
-}
-
-export function leanCloneThenSwap<T extends object>(
-  obj: T,
-  path: NestedObjPaths<T> | [],
-  key1: any,
-  key2: any
-): T {
-  const clonedObj = leanClone(obj, path);
-
-  let currentLevel: any = clonedObj;
-
-  for (let i = 0; i < path.length; i++) {
-    currentLevel = currentLevel[path[i]];
-  }
-
-  const temp = currentLevel[key1];
-  currentLevel[key1] = currentLevel[key2];
-  currentLevel[key2] = temp;
-
-  return clonedObj;
-}
-
-export function leanCloneThenPush<T extends object>(
-  obj: T,
-  path: NestedObjPaths<T> | [],
-  value: any
-): T {
-  const clonedObj = leanClone(obj, path as any);
-
-  let currentLevel: any = clonedObj;
-
-  for (let i = 0; i < path.length; i++) {
-    currentLevel = currentLevel[path[i]];
-  }
-
-  currentLevel.push(value);
+  func(currentObj, clonedObj);
 
   return clonedObj;
 }
