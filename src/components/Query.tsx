@@ -3,6 +3,7 @@
 import { memo } from "react";
 
 export interface IQuery {
+  id: string;
   enabled: boolean;
   value: string;
 }

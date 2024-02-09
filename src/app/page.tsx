@@ -1,5 +1,6 @@
 "use client";
 
+import { Api } from "@/app-specific/api";
 import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
 import Query, { IQuery } from "@/components/Query";
 import csvParser from "csv-parser";
@@ -10,24 +11,65 @@ export default function Home() {
   const [sheetData, setSheetData] = useAppIndexedDB("sheetData", () => "");
 
   const [queries, setQueries] = useAppIndexedDB<IQuery[]>("queries", () => [
-    { enabled: true, value: "" },
+    { id: crypto.randomUUID(), enabled: true, value: "" },
   ]);
   const [result, setResult] = useState("");
 
-  const [apiUrl, setApiUrl] = useAppIndexedDB("apiURL", () => "");
-  const [apiToken, setApiToken] = useAppIndexedDB("apiToken", () => "");
-  const [model, setModel] = useAppIndexedDB("model", () => "");
   const [systemPrompt, setSystemPrompt] = useAppIndexedDB(
     "systemPrompt",
     () => "You are a helpful AI assistant."
   );
+
+  const [apiIndex, setApiIndex] = useAppIndexedDB("apiIndex", () => 0);
+  const [apis, setApis] = useAppIndexedDB<Api[]>("apis", () => [
+    {
+      name: "OpenAI",
+      url: "https://api.openai.com/v1/chat/completions",
+      key: "",
+      models: [
+        "gpt-3.5-turbo-0125",
+        "gpt-3.5-turbo-0301",
+        "gpt-3.5-turbo-0613",
+        "gpt-3.5-turbo-1106",
+        "gpt-3.5-turbo-16k-0613",
+        "gpt-3.5-turbo-16k",
+        "gpt-3.5-turbo-instruct-0914",
+        "gpt-3.5-turbo-instruct",
+        "gpt-3.5-turbo",
+        "gpt-4-0125-preview",
+        "gpt-4-0613",
+        "gpt-4-1106-preview",
+        "gpt-4-turbo-preview",
+        "gpt-4-vision-preview",
+        "gpt-4",
+      ],
+      selectedModel: "gpt-3.5-turbo",
+    },
+    {
+      name: "OctoAI",
+      url: "https://text.octoai.run/v1/chat/completions",
+      key: "",
+      models: [
+        "codellama-7b-instruct-fp16",
+        "llama-2-13b-chat-fp16",
+        "llamaguard-7b-fp16",
+        "mistral-7b-instruct-fp16",
+        "mixtral-8x7b-instruct-fp16",
+      ],
+      selectedModel: "mixtral-8x7b-instruct-fp16",
+    },
+  ]);
 
   const [progress, setProgress] = useState<string | null>(null);
 
   const resultRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (resultRef.current) {
+    if (
+      resultRef.current &&
+      resultRef.current.scrollTop + resultRef.current.clientHeight ===
+        resultRef.current.scrollHeight
+    ) {
       resultRef.current.scrollTop = resultRef.current.scrollHeight;
     }
   }, [result]);
@@ -60,14 +102,14 @@ export default function Home() {
               finalQuery = finalQuery.replace(`{{${key}}}`, row[key]);
             }
 
-            const response = await fetch(apiUrl, {
+            const response = await fetch(apis[apiIndex].url, {
               headers: {
-                Authorization: `Bearer ${apiToken}`,
+                Authorization: `Bearer ${apis[apiIndex].key}`,
                 "Content-Type": "application/json",
               },
               method: "POST",
               body: JSON.stringify({
-                model: model,
+                model: apis[apiIndex].selectedModel,
 
                 messages: [
                   {
@@ -130,7 +172,7 @@ export default function Home() {
               onClick={() => {
                 setQueries((queries) => [
                   ...queries,
-                  { enabled: true, value: "" },
+                  { id: crypto.randomUUID(), enabled: true, value: "" },
                 ]);
               }}
               className="p-1 border border-black rounded-md bg-neutral-300"
@@ -165,6 +207,103 @@ export default function Home() {
               key={index}
             />
           ))}
+
+          <div className="h-4"></div>
+
+          <div className="flex flex-col">
+            <div>System prompt:</div>
+
+            <textarea
+              value={systemPrompt}
+              onChange={(event) => setSystemPrompt(event.target.value)}
+              className="h-32 p-1 border border-black rounded-md resize-none bg-neutral-300"
+            />
+          </div>
+        </div>
+
+        <hr />
+
+        <div className="p-4 flex flex-col">
+          <div className="flex flex-col">
+            <div>API:</div>
+
+            <select
+              className="p-1 border border-black rounded-md bg-neutral-300"
+              value={apiIndex}
+              onChange={(event) => setApiIndex(parseInt(event.target.value))}
+            >
+              {apis.map((api, index) => (
+                <option key={index} value={index}>
+                  {api.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="h-2"></div>
+
+          <div className="flex flex-col">
+            <div>API URL:</div>
+
+            <input
+              type="text"
+              value={apis[apiIndex].url}
+              onChange={(event) => {
+                const newApis = [...apis];
+                newApis[apiIndex].url = event.target.value;
+                setApis(newApis);
+              }}
+              className="p-1 border border-black rounded-md resize-none bg-neutral-300"
+            />
+          </div>
+
+          <div className="h-2"></div>
+
+          <div className="flex flex-col">
+            <div>API key:</div>
+
+            <input
+              type="password"
+              value={apis[apiIndex].key}
+              onChange={(event) => {
+                const newApis = [...apis];
+                newApis[apiIndex].key = event.target.value;
+                setApis(newApis);
+              }}
+              className="p-1 border border-black rounded-md resize-none bg-neutral-300"
+            />
+          </div>
+
+          <div className="h-2"></div>
+
+          <div className="flex flex-col">
+            <div>Model:</div>
+
+            <select
+              className="p-1 border border-black rounded-md bg-neutral-300"
+              value={apis[apiIndex].selectedModel}
+              onChange={(event) => {
+                const newApis = [...apis];
+                newApis[apiIndex].selectedModel = event.target.value;
+                setApis(newApis);
+              }}
+            >
+              {apis[apiIndex].models.map((model, index) => (
+                <option key={index} value={model}>
+                  {model}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="h-6"></div>
+
+          <button
+            className="p-2 bg-neutral-300 rounded-md"
+            onClick={processSheet}
+          >
+            Process data
+          </button>
         </div>
 
         <hr />
@@ -177,70 +316,8 @@ export default function Home() {
             readOnly
             value={result}
             className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
-            placeholder="Process the sheet to see the result here."
+            placeholder="Process the data to see the result here."
           ></textarea>
-        </div>
-
-        <hr />
-
-        <div className="p-4 flex flex-col">
-          <div className="flex flex-col">
-            <div>API URL:</div>
-
-            <input
-              type="text"
-              value={apiUrl}
-              onChange={(event) => setApiUrl(event.target.value)}
-              className="p-1 border border-black rounded-md resize-none bg-neutral-300"
-            />
-          </div>
-
-          <div className="h-2"></div>
-
-          <div className="flex flex-col">
-            <div>API token:</div>
-
-            <input
-              type="password"
-              value={apiToken}
-              onChange={(event) => setApiToken(event.target.value)}
-              className="p-1 border border-black rounded-md resize-none bg-neutral-300"
-            />
-          </div>
-
-          <div className="h-2"></div>
-
-          <div className="flex flex-col">
-            <div>Model:</div>
-
-            <input
-              type="text"
-              value={model}
-              onChange={(event) => setModel(event.target.value)}
-              className="p-1 border border-black rounded-md resize-none bg-neutral-300"
-            />
-          </div>
-
-          <div className="h-2"></div>
-
-          <div className="flex flex-col">
-            <div>System prompt:</div>
-
-            <textarea
-              value={systemPrompt}
-              onChange={(event) => setSystemPrompt(event.target.value)}
-              className="h-32 p-1 border border-black rounded-md resize-none bg-neutral-300"
-            />
-          </div>
-
-          <div className="h-6"></div>
-
-          <button
-            className="p-2 bg-neutral-300 rounded-md"
-            onClick={processSheet}
-          >
-            Process sheet
-          </button>
         </div>
       </div>
     </main>
