@@ -54,8 +54,6 @@ export default function Home() {
               continue;
             }
 
-            const startTime = Date.now();
-
             let finalQuery = query.value;
 
             for (const key in row) {
@@ -103,8 +101,6 @@ export default function Home() {
                   queryIdx === lastEnabledQueryIdx ? "\n" : "\t"
                 }`
             );
-
-            // await sleep(Math.max(0, 500 - (Date.now() - startTime)));
           }
 
           setProgress(`${rowIdx + 1}/${rows.length}`);
