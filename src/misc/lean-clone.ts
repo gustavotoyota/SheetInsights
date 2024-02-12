@@ -8,7 +8,7 @@ export type NestedObjPaths<T> = {
 
 export type NestedValueType<T, K extends any[]> = K extends [
   infer F,
-  ...infer R
+  ...infer R,
 ]
   ? F extends keyof T
     ? R extends any[]
@@ -19,7 +19,7 @@ export type NestedValueType<T, K extends any[]> = K extends [
 
 export function leanClone<T extends object>(
   obj: T,
-  path?: NestedObjPaths<T> | []
+  path?: NestedObjPaths<T> | [],
 ): T {
   const clonedRoot = (Array.isArray(obj) ? [...obj] : { ...obj }) as T;
 
@@ -46,23 +46,23 @@ export function leanClone<T extends object>(
 
 export function leanCloneThen<Obj extends object>(
   obj: Obj,
-  func: (targetObj: Obj, obj: Obj) => void
+  func: (targetObj: Obj, obj: Obj) => void,
 ): Obj;
 export function leanCloneThen<
   Obj extends object,
   Path extends NestedObjPaths<Obj> | [],
-  TargetObj extends NestedValueType<Obj, Path>
+  TargetObj extends NestedValueType<Obj, Path>,
 >(obj: Obj, path: Path, func: (targetObj: TargetObj, obj: Obj) => void): Obj;
 export function leanCloneThen<
   Obj extends object,
   Path extends NestedObjPaths<Obj> | [],
-  TargetObj extends NestedValueType<Obj, Path>
+  TargetObj extends NestedValueType<Obj, Path>,
 >(
   obj: Obj,
   path: Path | ((targetObj: TargetObj, obj: Obj) => void),
-  func?: (targetObj: TargetObj, obj: Obj) => void
+  func?: (targetObj: TargetObj, obj: Obj) => void,
 ): Obj {
-  if (typeof path === "function") {
+  if (typeof path === 'function') {
     return leanCloneThen(obj, [], path as any);
   }
 

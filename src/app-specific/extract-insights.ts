@@ -1,7 +1,9 @@
-import { IQuery } from "@/components/Query";
-import csvParser from "csv-parser";
-import { Readable } from "stream";
-import { Api } from "./api";
+import csvParser from 'csv-parser';
+import { Readable } from 'stream';
+
+import type { IQuery } from '@/components/Query';
+
+import type { Api } from './api';
 
 export function extractInsights(props: {
   csvData: string;
@@ -14,12 +16,12 @@ export function extractInsights(props: {
 }) {
   const rows: string[][] = [];
 
-  let result = "";
+  let result = '';
 
   Readable.from(props.csvData)
     .pipe(csvParser())
-    .on("data", (data) => rows.push(data))
-    .on("end", async () => {
+    .on('data', (data) => rows.push(data))
+    .on('end', async () => {
       props.onResultChange(result);
 
       props.onProgressUpdate(`0/${rows.length}`);
@@ -44,19 +46,19 @@ export function extractInsights(props: {
           const response = await fetch(props.api.url, {
             headers: {
               Authorization: `Bearer ${props.api.key}`,
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
-            method: "POST",
+            method: 'POST',
             body: JSON.stringify({
               model: props.api.selectedModel,
 
               messages: [
                 {
-                  role: "system",
+                  role: 'system',
                   content: props.systemPrompt,
                 },
                 {
-                  role: "user",
+                  role: 'user',
                   content: finalQuery,
                 },
               ],
@@ -69,7 +71,7 @@ export function extractInsights(props: {
           });
 
           if (!response.ok) {
-            throw new Error("HTTP error " + response.status);
+            throw new Error('HTTP error ' + response.status);
           }
 
           const data = await response.json();
@@ -77,7 +79,7 @@ export function extractInsights(props: {
           result += `${data.choices[0].message.content
             .trim()
             .replaceAll('"', '""')}${
-            queryIdx === lastEnabledQueryIdx ? "\n" : "\t"
+            queryIdx === lastEnabledQueryIdx ? '\n' : '\t'
           }`;
 
           props.onResultChange(result);

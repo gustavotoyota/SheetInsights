@@ -1,76 +1,76 @@
-"use client";
+'use client';
 
-import { Api } from "@/app-specific/api";
-import { extractInsights } from "@/app-specific/extract-insights";
-import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
-import ApiForm from "@/components/ApiForm";
-import Query, { IQuery } from "@/components/Query";
-import { leanClone, leanCloneThen } from "@/misc/lean-clone";
-import { swap } from "@/misc/swap";
-import csvParser from "csv-parser";
-import { useEffect, useRef, useState } from "react";
-import { Readable } from "stream";
+import { useEffect, useRef, useState } from 'react';
+
+import type { Api } from '@/app-specific/api';
+import { extractInsights } from '@/app-specific/extract-insights';
+import { useAppIndexedDB } from '@/app-specific/use-app-indexeddb';
+import ApiForm from '@/components/ApiForm';
+import type { IQuery } from '@/components/Query';
+import Query from '@/components/Query';
+import { leanCloneThen } from '@/misc/lean-clone';
+import { swap } from '@/misc/swap';
 
 export default function Home() {
-  const [sheetData, setSheetData] = useAppIndexedDB("sheetData", () => "");
+  const [sheetData, setSheetData] = useAppIndexedDB('sheetData', () => '');
 
-  const [queries, setQueries] = useAppIndexedDB<IQuery[]>("queries", () => [
+  const [queries, setQueries] = useAppIndexedDB<IQuery[]>('queries', () => [
     {
       id: crypto.randomUUID(),
-      title: "",
+      title: '',
       expanded: true,
       enabled: true,
-      value: "",
+      value: '',
     },
   ]);
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState('');
 
   const [systemPrompt, setSystemPrompt] = useAppIndexedDB(
-    "systemPrompt",
-    () => "You are a helpful AI assistant."
+    'systemPrompt',
+    () => 'You are a helpful AI assistant.',
   );
 
-  const [apiIndex, setApiIndex] = useAppIndexedDB("apiIndex", () => 0);
-  const [apis, setApis] = useAppIndexedDB<Api[]>("apis", () => [
+  const [apiIndex, setApiIndex] = useAppIndexedDB('apiIndex', () => 0);
+  const [apis, setApis] = useAppIndexedDB<Api[]>('apis', () => [
     {
-      name: "OpenAI",
-      url: "https://api.openai.com/v1/chat/completions",
-      key: "",
+      name: 'OpenAI',
+      url: 'https://api.openai.com/v1/chat/completions',
+      key: '',
       models: [
-        "gpt-3.5-turbo-0125",
-        "gpt-3.5-turbo-0301",
-        "gpt-3.5-turbo-0613",
-        "gpt-3.5-turbo-1106",
-        "gpt-3.5-turbo-16k-0613",
-        "gpt-3.5-turbo-16k",
-        "gpt-3.5-turbo-instruct-0914",
-        "gpt-3.5-turbo-instruct",
-        "gpt-3.5-turbo",
-        "gpt-4-0125-preview",
-        "gpt-4-0613",
-        "gpt-4-1106-preview",
-        "gpt-4-turbo-preview",
-        "gpt-4-vision-preview",
-        "gpt-4",
+        'gpt-3.5-turbo-0125',
+        'gpt-3.5-turbo-0301',
+        'gpt-3.5-turbo-0613',
+        'gpt-3.5-turbo-1106',
+        'gpt-3.5-turbo-16k-0613',
+        'gpt-3.5-turbo-16k',
+        'gpt-3.5-turbo-instruct-0914',
+        'gpt-3.5-turbo-instruct',
+        'gpt-3.5-turbo',
+        'gpt-4-0125-preview',
+        'gpt-4-0613',
+        'gpt-4-1106-preview',
+        'gpt-4-turbo-preview',
+        'gpt-4-vision-preview',
+        'gpt-4',
       ],
-      selectedModel: "gpt-3.5-turbo",
+      selectedModel: 'gpt-3.5-turbo',
     },
     {
-      name: "OctoAI",
-      url: "https://text.octoai.run/v1/chat/completions",
-      key: "",
+      name: 'OctoAI',
+      url: 'https://text.octoai.run/v1/chat/completions',
+      key: '',
       models: [
-        "codellama-7b-instruct-fp16",
-        "codellama-13b-instruct-fp16",
-        "codellama-34b-instruct-fp16",
-        "codellama-70b-instruct-fp16",
-        "llama-2-13b-chat-fp16",
-        "llama-2-70b-chat-fp16",
-        "llamaguard-7b-fp16",
-        "mistral-7b-instruct-fp16",
-        "mixtral-8x7b-instruct-fp16",
+        'codellama-7b-instruct-fp16',
+        'codellama-13b-instruct-fp16',
+        'codellama-34b-instruct-fp16',
+        'codellama-70b-instruct-fp16',
+        'llama-2-13b-chat-fp16',
+        'llama-2-70b-chat-fp16',
+        'llamaguard-7b-fp16',
+        'mistral-7b-instruct-fp16',
+        'mixtral-8x7b-instruct-fp16',
       ],
-      selectedModel: "mixtral-8x7b-instruct-fp16",
+      selectedModel: 'mixtral-8x7b-instruct-fp16',
     },
   ]);
 
@@ -105,19 +105,19 @@ export default function Home() {
 
         <div className="p-4 flex flex-col">
           <div>
-            Queries (use {"{{column}}"} to place column values):{" "}
+            Queries (use {'{{column}}'} to place column values):{' '}
             <button
               onClick={() => {
                 setQueries(
                   leanCloneThen(queries, (queries) =>
                     queries.push({
                       id: crypto.randomUUID(),
-                      title: "",
+                      title: '',
                       expanded: true,
                       enabled: true,
-                      value: "",
-                    })
-                  )
+                      value: '',
+                    }),
+                  ),
                 );
               }}
               className="p-1 border border-black rounded-md bg-neutral-300"
@@ -134,8 +134,8 @@ export default function Home() {
                 setQueries(
                   leanCloneThen(
                     queries,
-                    (queries) => (queries[index] = newQuery)
-                  )
+                    (queries) => (queries[index] = newQuery),
+                  ),
                 )
               }
               onMoveUp={() => {
@@ -145,8 +145,8 @@ export default function Home() {
 
                 setQueries(
                   leanCloneThen(queries, (queries) =>
-                    swap(queries, index, index - 1)
-                  )
+                    swap(queries, index, index - 1),
+                  ),
                 );
               }}
               onMoveDown={() => {
@@ -156,8 +156,8 @@ export default function Home() {
 
                 setQueries(
                   leanCloneThen(queries, (queries) =>
-                    swap(queries, index, index + 1)
-                  )
+                    swap(queries, index, index + 1),
+                  ),
                 );
               }}
               onDelete={() => {
@@ -166,7 +166,7 @@ export default function Home() {
                 }
 
                 setQueries(
-                  leanCloneThen(queries, (queries) => queries.splice(index, 1))
+                  leanCloneThen(queries, (queries) => queries.splice(index, 1)),
                 );
               }}
             />
@@ -218,7 +218,7 @@ export default function Home() {
 
           <div className="h-6"></div>
 
-          <div>Result{progress ? ` (${progress})` : ""}:</div>
+          <div>Result{progress ? ` (${progress})` : ''}:</div>
 
           <textarea
             ref={resultRef}

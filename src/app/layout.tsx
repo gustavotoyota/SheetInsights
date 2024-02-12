@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import './globals.css';
 
-const inter = Inter({ subsets: ["latin"] });
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "SheetInsights",
-  description: "AI-powered insights from CSV data",
+  title: 'SheetInsights',
+  description: 'AI-powered insights from CSV data',
 };
 
 export default function RootLayout({

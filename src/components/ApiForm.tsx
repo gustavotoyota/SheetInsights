@@ -1,5 +1,5 @@
-import { Api } from "@/app-specific/api";
-import { leanCloneThen } from "@/misc/lean-clone";
+import type { Api } from '@/app-specific/api';
+import { leanCloneThen } from '@/misc/lean-clone';
 
 export default function ApiForm(props: {
   apis: Api[];
@@ -20,7 +20,10 @@ export default function ApiForm(props: {
           }
         >
           {props.apis.map((api, index) => (
-            <option key={index} value={index}>
+            <option
+              key={index}
+              value={index}
+            >
               {api.name}
             </option>
           ))}
@@ -40,8 +43,8 @@ export default function ApiForm(props: {
               leanCloneThen(
                 props.apis,
                 [props.apiIndex],
-                (api) => (api.url = event.target.value)
-              )
+                (api) => (api.url = event.target.value),
+              ),
             );
           }}
           className="p-1 border border-black rounded-md resize-none bg-neutral-300"
@@ -61,8 +64,8 @@ export default function ApiForm(props: {
               leanCloneThen(
                 props.apis,
                 [props.apiIndex],
-                (api) => (api.key = event.target.value)
-              )
+                (api) => (api.key = event.target.value),
+              ),
             );
           }}
           placeholder={`Generate your ${
@@ -85,13 +88,16 @@ export default function ApiForm(props: {
               leanCloneThen(
                 props.apis,
                 [props.apiIndex],
-                (api) => (api.selectedModel = event.target.value)
-              )
+                (api) => (api.selectedModel = event.target.value),
+              ),
             );
           }}
         >
           {props.apis[props.apiIndex].models.map((model, index) => (
-            <option key={index} value={model}>
+            <option
+              key={index}
+              value={model}
+            >
               {model}
             </option>
           ))}

@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 export function useIndexedDB<T>(
   dbName: string,
   storeName: string,
   key: string,
-  initialValue: () => T
+  initialValue: () => T,
 ): [T, (value: T | ((oldValue: T) => T)) => void] {
   const [value, setValue] = useState<T>(initialValue);
 
@@ -16,18 +16,18 @@ export function useIndexedDB<T>(
     const openRequest = window.indexedDB.open(dbName);
 
     openRequest.onerror = function (event: any) {
-      console.error("IndexedDB error:", event.target?.error);
+      console.error('IndexedDB error:', event.target?.error);
     };
 
     openRequest.onsuccess = function (event) {
       db = openRequest.result;
 
-      const transaction = db.transaction([storeName], "readonly");
+      const transaction = db.transaction([storeName], 'readonly');
       const store = transaction.objectStore(storeName);
       const request = store.get(key);
 
       request.onerror = function (event: any) {
-        console.error("IndexedDB request error:", event.target?.error);
+        console.error('IndexedDB request error:', event.target?.error);
       };
 
       request.onsuccess = function (event) {
@@ -43,7 +43,7 @@ export function useIndexedDB<T>(
       };
 
       transaction.onerror = function (event: any) {
-        console.error("IndexedDB transaction error:", event.target?.error);
+        console.error('IndexedDB transaction error:', event.target?.error);
 
         loaded.current = true;
       };
@@ -66,13 +66,13 @@ export function useIndexedDB<T>(
     const openRequest = window.indexedDB.open(dbName);
 
     openRequest.onerror = function (event: any) {
-      console.error("IndexedDB error:", event.target?.error);
+      console.error('IndexedDB error:', event.target?.error);
     };
 
     openRequest.onsuccess = function (event) {
       db = openRequest.result;
 
-      const transaction = db.transaction([storeName], "readwrite");
+      const transaction = db.transaction([storeName], 'readwrite');
       const store = transaction.objectStore(storeName);
       store.put(value, key);
 

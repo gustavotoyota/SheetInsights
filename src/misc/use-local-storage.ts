@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export function useLocalStorage<T>(
   key: string,
-  initialValue: () => T
+  initialValue: () => T,
 ): [T, (value: T | ((oldValue: T) => T)) => void] {
   const [value, setValue] = useState(() => {
     const item =
-      typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
+      typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
 
     if (item) {
       try {

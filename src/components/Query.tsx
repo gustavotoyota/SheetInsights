@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import { leanCloneThen } from "@/misc/lean-clone";
-import { memo } from "react";
+import { memo } from 'react';
+
+import { leanCloneThen } from '@/misc/lean-clone';
 
 export interface IQuery {
   id: string;
@@ -27,12 +28,12 @@ const Query = memo(function Query(props: {
             props.onQueryChange(
               leanCloneThen(
                 props.query,
-                (query) => (query.expanded = !query.expanded)
-              )
+                (query) => (query.expanded = !query.expanded),
+              ),
             )
           }
         >
-          {props.query.expanded ? "⯆" : "⯈"}
+          {props.query.expanded ? '⯆' : '⯈'}
         </button>
 
         <div className="w-6"></div>
@@ -42,13 +43,13 @@ const Query = memo(function Query(props: {
             props.onQueryChange(
               leanCloneThen(
                 props.query,
-                (query) => (query.enabled = !query.enabled)
-              )
+                (query) => (query.enabled = !query.enabled),
+              ),
             )
           }
           className="p-1 border border-black rounded-md bg-neutral-300"
         >
-          {props.query.enabled ? "Enabled" : "Disabled"}
+          {props.query.enabled ? 'Enabled' : 'Disabled'}
         </button>
 
         <div className="w-6"></div>
@@ -78,8 +79,8 @@ const Query = memo(function Query(props: {
             props.onQueryChange(
               leanCloneThen(
                 props.query,
-                (query) => (query.title = event.target.value)
-              )
+                (query) => (query.title = event.target.value),
+              ),
             )
           }
           className="p-1 border border-black rounded-md bg-neutral-300"
@@ -102,8 +103,8 @@ const Query = memo(function Query(props: {
             props.onQueryChange(
               leanCloneThen(
                 props.query,
-                (query) => (query.value = event.target.value)
-              )
+                (query) => (query.value = event.target.value),
+              ),
             )
           }
           className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
