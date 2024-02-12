@@ -13,7 +13,7 @@ export default function ApiForm(props: {
         <div>API:</div>
 
         <select
-          className="p-1 border border-black rounded-md bg-neutral-300"
+          className="p-1 bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none"
           value={props.apiIndex}
           onChange={(event) =>
             props.onApiIndexChange(parseInt(event.target.value))
@@ -47,7 +47,7 @@ export default function ApiForm(props: {
               ),
             );
           }}
-          className="p-1 border border-black rounded-md resize-none bg-neutral-300"
+          className="px-2 py-1 bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none"
         />
       </div>
 
@@ -71,7 +71,7 @@ export default function ApiForm(props: {
           placeholder={`Generate your ${
             props.apis[props.apiIndex].name
           } API key and paste it here.`}
-          className="p-1 border border-black rounded-md resize-none bg-neutral-300"
+          className="px-2 py-1 bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none"
         />
       </div>
 
@@ -81,7 +81,7 @@ export default function ApiForm(props: {
         <div>Model:</div>
 
         <select
-          className="p-1 border border-black rounded-md bg-neutral-300"
+          className="p-1 bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none"
           value={props.apis[props.apiIndex].selectedModel}
           onChange={(event) => {
             props.onApisChange(

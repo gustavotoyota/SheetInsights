@@ -90,18 +90,21 @@ export default function Home() {
 
   return (
     <main>
+      <div className="h-4"></div>
+
       <div className="container mx-auto flex flex-col lg:flex-row">
         <div className="flex-1">
           <div className="p-4 flex flex-col">
             <div>CSV data (with headers):</div>
+
+            <div className="h-2"></div>
+
             <textarea
               value={sheetData}
               onChange={(event) => setSheetData(event.target.value)}
-              className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
+              className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-none"
             ></textarea>
           </div>
-
-          <hr />
 
           <div className="p-4 flex flex-col">
             <div>
@@ -120,75 +123,79 @@ export default function Home() {
                     ),
                   );
                 }}
-                className="p-1 border border-black rounded-md bg-neutral-300"
+                className="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-slate-50 rounded-md"
               >
                 Add query
               </button>
             </div>
 
-            {queries.map((query, index) => (
-              <Query
-                key={query.id}
-                query={query}
-                onQueryChange={(newQuery) =>
-                  setQueries(
-                    leanCloneThen(
-                      queries,
-                      (queries) => (queries[index] = newQuery),
-                    ),
-                  )
-                }
-                onMoveUp={() => {
-                  if (index === 0) {
-                    return;
+            <div className="h-3"></div>
+
+            <div className="flex flex-col gap-3">
+              {queries.map((query, index) => (
+                <Query
+                  key={query.id}
+                  query={query}
+                  queryIndex={index}
+                  numQueries={queries.length}
+                  onQueryChange={(newQuery) =>
+                    setQueries(
+                      leanCloneThen(
+                        queries,
+                        (queries) => (queries[index] = newQuery),
+                      ),
+                    )
                   }
+                  onMoveUp={() => {
+                    if (index === 0) {
+                      return;
+                    }
 
-                  setQueries(
-                    leanCloneThen(queries, (queries) =>
-                      swap(queries, index, index - 1),
-                    ),
-                  );
-                }}
-                onMoveDown={() => {
-                  if (index === queries.length - 1) {
-                    return;
-                  }
+                    setQueries(
+                      leanCloneThen(queries, (queries) =>
+                        swap(queries, index, index - 1),
+                      ),
+                    );
+                  }}
+                  onMoveDown={() => {
+                    if (index === queries.length - 1) {
+                      return;
+                    }
 
-                  setQueries(
-                    leanCloneThen(queries, (queries) =>
-                      swap(queries, index, index + 1),
-                    ),
-                  );
-                }}
-                onDelete={() => {
-                  if (queries.length === 1) {
-                    return;
-                  }
+                    setQueries(
+                      leanCloneThen(queries, (queries) =>
+                        swap(queries, index, index + 1),
+                      ),
+                    );
+                  }}
+                  onDelete={() => {
+                    if (queries.length === 1) {
+                      return;
+                    }
 
-                  setQueries(
-                    leanCloneThen(queries, (queries) =>
-                      queries.splice(index, 1),
-                    ),
-                  );
-                }}
-              />
-            ))}
-
-            <div className="h-4"></div>
-
-            <div className="flex flex-col">
-              <div>System prompt:</div>
-
-              <textarea
-                value={systemPrompt}
-                onChange={(event) => setSystemPrompt(event.target.value)}
-                className="h-32 p-1 border border-black rounded-md resize-none bg-neutral-300"
-              />
+                    setQueries(
+                      leanCloneThen(queries, (queries) =>
+                        queries.splice(index, 1),
+                      ),
+                    );
+                  }}
+                />
+              ))}
             </div>
           </div>
-        </div>
 
-        <hr />
+          <div className="p-4 flex flex-col">
+            <div>System prompt:</div>
+
+            <div className="h-2"></div>
+
+            <textarea
+              value={systemPrompt}
+              onChange={(event) => setSystemPrompt(event.target.value)}
+              className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-none"
+            />
+          </div>
+        </div>
 
         <div className="flex-1">
           <div className="p-4 flex flex-col">
@@ -200,11 +207,9 @@ export default function Home() {
             />
           </div>
 
-          <hr />
-
           <div className="p-4 flex flex-col">
             <button
-              className="p-2 bg-neutral-300 rounded-md"
+              className="p-2 bg-slate-600 hover:bg-slate-500 text-slate-50 rounded-md"
               onClick={() =>
                 extractInsights({
                   csvData: sheetData,
@@ -222,14 +227,16 @@ export default function Home() {
 
             <div className="h-6"></div>
 
-            <div>Result{progress ? ` (${progress})` : ''}:</div>
+            <div>Results{progress ? ` (${progress})` : ''}:</div>
+
+            <div className="h-2"></div>
 
             <textarea
               ref={resultRef}
               readOnly
               value={result}
-              className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
-              placeholder="Insights go here."
+              className="h-72 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-none"
+              placeholder="Results go here."
             ></textarea>
           </div>
         </div>
