@@ -90,143 +90,148 @@ export default function Home() {
 
   return (
     <main>
-      <div className="container mx-auto">
-        <div className="p-4 flex flex-col">
-          <div>CSV data (with headers):</div>
+      <div className="container mx-auto flex flex-col lg:flex-row">
+        <div className="flex-1">
+          <div className="p-4 flex flex-col">
+            <div>CSV data (with headers):</div>
+            <textarea
+              value={sheetData}
+              onChange={(event) => setSheetData(event.target.value)}
+              className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
+            ></textarea>
+          </div>
 
-          <textarea
-            value={sheetData}
-            onChange={(event) => setSheetData(event.target.value)}
-            className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
-          ></textarea>
+          <hr />
+
+          <div className="p-4 flex flex-col">
+            <div>
+              Queries (use {'{{column}}'} to place column values):{' '}
+              <button
+                onClick={() => {
+                  setQueries(
+                    leanCloneThen(queries, (queries) =>
+                      queries.push({
+                        id: crypto.randomUUID(),
+                        title: '',
+                        expanded: true,
+                        enabled: true,
+                        value: '',
+                      }),
+                    ),
+                  );
+                }}
+                className="p-1 border border-black rounded-md bg-neutral-300"
+              >
+                Add query
+              </button>
+            </div>
+
+            {queries.map((query, index) => (
+              <Query
+                key={query.id}
+                query={query}
+                onQueryChange={(newQuery) =>
+                  setQueries(
+                    leanCloneThen(
+                      queries,
+                      (queries) => (queries[index] = newQuery),
+                    ),
+                  )
+                }
+                onMoveUp={() => {
+                  if (index === 0) {
+                    return;
+                  }
+
+                  setQueries(
+                    leanCloneThen(queries, (queries) =>
+                      swap(queries, index, index - 1),
+                    ),
+                  );
+                }}
+                onMoveDown={() => {
+                  if (index === queries.length - 1) {
+                    return;
+                  }
+
+                  setQueries(
+                    leanCloneThen(queries, (queries) =>
+                      swap(queries, index, index + 1),
+                    ),
+                  );
+                }}
+                onDelete={() => {
+                  if (queries.length === 1) {
+                    return;
+                  }
+
+                  setQueries(
+                    leanCloneThen(queries, (queries) =>
+                      queries.splice(index, 1),
+                    ),
+                  );
+                }}
+              />
+            ))}
+
+            <div className="h-4"></div>
+
+            <div className="flex flex-col">
+              <div>System prompt:</div>
+
+              <textarea
+                value={systemPrompt}
+                onChange={(event) => setSystemPrompt(event.target.value)}
+                className="h-32 p-1 border border-black rounded-md resize-none bg-neutral-300"
+              />
+            </div>
+          </div>
         </div>
 
         <hr />
 
-        <div className="p-4 flex flex-col">
-          <div>
-            Queries (use {'{{column}}'} to place column values):{' '}
-            <button
-              onClick={() => {
-                setQueries(
-                  leanCloneThen(queries, (queries) =>
-                    queries.push({
-                      id: crypto.randomUUID(),
-                      title: '',
-                      expanded: true,
-                      enabled: true,
-                      value: '',
-                    }),
-                  ),
-                );
-              }}
-              className="p-1 border border-black rounded-md bg-neutral-300"
-            >
-              +
-            </button>
+        <div className="flex-1">
+          <div className="p-4 flex flex-col">
+            <ApiForm
+              apis={apis}
+              apiIndex={apiIndex}
+              onApisChange={(newApis) => setApis(newApis)}
+              onApiIndexChange={(newApiIndex) => setApiIndex(newApiIndex)}
+            />
           </div>
 
-          {queries.map((query, index) => (
-            <Query
-              key={query.id}
-              query={query}
-              onQueryChange={(newQuery) =>
-                setQueries(
-                  leanCloneThen(
-                    queries,
-                    (queries) => (queries[index] = newQuery),
-                  ),
-                )
+          <hr />
+
+          <div className="p-4 flex flex-col">
+            <button
+              className="p-2 bg-neutral-300 rounded-md"
+              onClick={() =>
+                extractInsights({
+                  csvData: sheetData,
+                  queries,
+                  systemPrompt,
+                  api: apis[apiIndex],
+
+                  onResultChange: (result) => setResult(result),
+                  onProgressUpdate: (progress) => setProgress(progress),
+                })
               }
-              onMoveUp={() => {
-                if (index === 0) {
-                  return;
-                }
+            >
+              Extract insights
+            </button>
 
-                setQueries(
-                  leanCloneThen(queries, (queries) =>
-                    swap(queries, index, index - 1),
-                  ),
-                );
-              }}
-              onMoveDown={() => {
-                if (index === queries.length - 1) {
-                  return;
-                }
+            <div className="h-6"></div>
 
-                setQueries(
-                  leanCloneThen(queries, (queries) =>
-                    swap(queries, index, index + 1),
-                  ),
-                );
-              }}
-              onDelete={() => {
-                if (queries.length === 1) {
-                  return;
-                }
-
-                setQueries(
-                  leanCloneThen(queries, (queries) => queries.splice(index, 1)),
-                );
-              }}
-            />
-          ))}
-
-          <div className="h-4"></div>
-
-          <div className="flex flex-col">
-            <div>System prompt:</div>
+            <div>Result{progress ? ` (${progress})` : ''}:</div>
 
             <textarea
-              value={systemPrompt}
-              onChange={(event) => setSystemPrompt(event.target.value)}
-              className="h-32 p-1 border border-black rounded-md resize-none bg-neutral-300"
-            />
+              ref={resultRef}
+              readOnly
+              value={result}
+              className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
+              placeholder="Insights go here."
+            ></textarea>
           </div>
-        </div>
-
-        <hr />
-
-        <div className="p-4 flex flex-col">
-          <ApiForm
-            apis={apis}
-            apiIndex={apiIndex}
-            onApisChange={(newApis) => setApis(newApis)}
-            onApiIndexChange={(newApiIndex) => setApiIndex(newApiIndex)}
-          />
-        </div>
-
-        <hr />
-
-        <div className="p-4 flex flex-col">
-          <button
-            className="p-2 bg-neutral-300 rounded-md"
-            onClick={() =>
-              extractInsights({
-                csvData: sheetData,
-                queries,
-                systemPrompt,
-                api: apis[apiIndex],
-
-                onResultChange: (result) => setResult(result),
-                onProgressUpdate: (progress) => setProgress(progress),
-              })
-            }
-          >
-            Extract insights
-          </button>
-
-          <div className="h-6"></div>
-
-          <div>Result{progress ? ` (${progress})` : ''}:</div>
-
-          <textarea
-            ref={resultRef}
-            readOnly
-            value={result}
-            className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
-            placeholder="Insights go here."
-          ></textarea>
         </div>
       </div>
     </main>
