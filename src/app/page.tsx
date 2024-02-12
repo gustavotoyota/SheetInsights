@@ -1,6 +1,7 @@
 "use client";
 
 import { Api } from "@/app-specific/api";
+import { extractInsights } from "@/app-specific/extract-insights";
 import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
 import ApiForm from "@/components/ApiForm";
 import Query, { IQuery } from "@/components/Query";
@@ -86,82 +87,6 @@ export default function Home() {
       resultRef.current.scrollTop = resultRef.current.scrollHeight;
     }
   }, [result]);
-
-  function processSheet() {
-    const rows: any[] = [];
-
-    Readable.from(sheetData)
-      .pipe(csvParser())
-      .on("data", (data) => rows.push(data))
-      .on("end", async () => {
-        setResult("");
-
-        setProgress(`0/${rows.length}`);
-
-        const lastEnabledQueryIdx = queries
-          .map((query, index) => (query.enabled ? index : -1))
-          .filter((index) => index !== -1)
-          .at(-1);
-
-        for (const [rowIdx, row] of Array.from(rows.entries())) {
-          for (const [queryIdx, query] of Array.from(queries.entries())) {
-            if (!query.enabled) {
-              continue;
-            }
-
-            let finalQuery = query.value;
-
-            for (const key in row) {
-              finalQuery = finalQuery.replace(`{{${key}}}`, row[key]);
-            }
-
-            const response = await fetch(apis[apiIndex].url, {
-              headers: {
-                Authorization: `Bearer ${apis[apiIndex].key}`,
-                "Content-Type": "application/json",
-              },
-              method: "POST",
-              body: JSON.stringify({
-                model: apis[apiIndex].selectedModel,
-
-                messages: [
-                  {
-                    role: "system",
-                    content: systemPrompt,
-                  },
-                  {
-                    role: "user",
-                    content: finalQuery,
-                  },
-                ],
-
-                max_tokens: 128,
-                presence_penalty: 0,
-                temperature: 0.1,
-                top_p: 0.9,
-              }),
-            });
-
-            if (!response.ok) {
-              throw new Error("HTTP error " + response.status);
-            }
-
-            const data = await response.json();
-
-            setResult(
-              (result) =>
-                `${result}"${data.choices[0].message.content
-                  .trim()
-                  .replaceAll('"', '""')}"${
-                  queryIdx === lastEnabledQueryIdx ? "\n" : "\t"
-                }`
-            );
-          }
-
-          setProgress(`${rowIdx + 1}/${rows.length}`);
-        }
-      });
-  }
 
   return (
     <main>
@@ -276,7 +201,17 @@ export default function Home() {
         <div className="p-4 flex flex-col">
           <button
             className="p-2 bg-neutral-300 rounded-md"
-            onClick={processSheet}
+            onClick={() =>
+              extractInsights({
+                csvData: sheetData,
+                queries,
+                systemPrompt,
+                api: apis[apiIndex],
+
+                onResultChange: (result) => setResult(result),
+                onProgressUpdate: (progress) => setProgress(progress),
+              })
+            }
           >
             Extract insights
           </button>
