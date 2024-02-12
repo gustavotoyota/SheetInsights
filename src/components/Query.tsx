@@ -114,7 +114,7 @@ const Query = memo(function Query(props: {
                 ),
               )
             }
-            className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-none"
+            className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-y"
           ></textarea>
         </>
       )}

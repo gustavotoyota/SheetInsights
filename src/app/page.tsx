@@ -90,11 +90,35 @@ export default function Home() {
 
   return (
     <main>
-      <div className="h-4"></div>
+      <div className="h-5"></div>
 
-      <div className="container mx-auto flex flex-col lg:flex-row">
+      <div className="text-center">
+        <div className="text-white/60 text-xs">
+          Developed by{' '}
+          <a
+            href="https://gustavotoyota.dev/"
+            className="text-sky-400 hover:text-sky-300"
+            target="_blank"
+          >
+            Gustavo Toyota
+          </a>
+        </div>
+        <div className="text-white/60 text-xs">
+          <a
+            href="https://github.com/gustavotoyota/SheetInsights"
+            className="text-sky-400 hover:text-sky-300"
+            target="_blank"
+          >
+            https://github.com/gustavotoyota/SheetInsights
+          </a>
+        </div>
+      </div>
+
+      <div className="h-5"></div>
+
+      <div className="px-7 container mx-auto flex flex-col lg:flex-row gap-7">
         <div className="flex-1">
-          <div className="p-4 flex flex-col">
+          <div className="flex flex-col">
             <div>CSV data (with headers):</div>
 
             <div className="h-2"></div>
@@ -102,13 +126,31 @@ export default function Home() {
             <textarea
               value={sheetData}
               onChange={(event) => setSheetData(event.target.value)}
-              className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-none"
+              className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-y"
             ></textarea>
           </div>
 
-          <div className="p-4 flex flex-col">
+          <div className="h-6"></div>
+
+          <div className="flex flex-col">
+            <div>System prompt:</div>
+
+            <div className="h-2"></div>
+
+            <textarea
+              value={systemPrompt}
+              onChange={(event) => setSystemPrompt(event.target.value)}
+              className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-y"
+            />
+          </div>
+
+          <div className="h-6"></div>
+
+          <div className="flex flex-col">
             <div>
-              Queries (use {'{{column}}'} to place column values):{' '}
+              Queries (use the syntax {'{{column-name}}'} to place column
+              values):
+              <div className="inline-block w-3"></div>
               <button
                 onClick={() => {
                   setQueries(
@@ -183,22 +225,10 @@ export default function Home() {
               ))}
             </div>
           </div>
-
-          <div className="p-4 flex flex-col">
-            <div>System prompt:</div>
-
-            <div className="h-2"></div>
-
-            <textarea
-              value={systemPrompt}
-              onChange={(event) => setSystemPrompt(event.target.value)}
-              className="h-48 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-none"
-            />
-          </div>
         </div>
 
-        <div className="flex-1">
-          <div className="p-4 flex flex-col">
+        <div className="flex-1 flex flex-col">
+          <div className="flex flex-col">
             <ApiForm
               apis={apis}
               apiIndex={apiIndex}
@@ -207,7 +237,9 @@ export default function Home() {
             />
           </div>
 
-          <div className="p-4 flex flex-col">
+          <div className="h-5"></div>
+
+          <div className="flex flex-col flex-1">
             <button
               className="p-2 bg-slate-600 hover:bg-slate-500 text-slate-50 rounded-md"
               onClick={() =>
@@ -235,12 +267,14 @@ export default function Home() {
               ref={resultRef}
               readOnly
               value={result}
-              className="h-72 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-none"
+              className="flex-1 min-h-80 px-2 py-[6px] bg-slate-800 text-slate-200 border border-slate-700 rounded-md outline-none resize-y"
               placeholder="Results go here."
             ></textarea>
           </div>
         </div>
       </div>
+
+      <div className="h-24"></div>
     </main>
   );
 }
