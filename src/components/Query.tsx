@@ -1,5 +1,6 @@
 "use client";
 
+import { leanCloneThen } from "@/misc/lean-clone";
 import { memo } from "react";
 
 export interface IQuery {
@@ -11,16 +12,10 @@ export interface IQuery {
 }
 
 const Query = memo(function Query(props: {
-  title: string;
-  expanded: boolean;
-  enabled: boolean;
-  value: string;
-  onTitleChange: (title: string) => void;
-  onValueChange: (text: string) => void;
+  query: IQuery;
+  onQueryChange: (newQuery: IQuery) => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
-  onToggleExpanded: (expanded: boolean) => void;
-  onToggleEnabled: (enabled: boolean) => void;
   onDelete: () => void;
 }) {
   return (
@@ -28,18 +23,32 @@ const Query = memo(function Query(props: {
       <div className="flex">
         <button
           className="p-1 border border-black rounded-md bg-neutral-300"
-          onClick={() => props.onToggleExpanded(!props.expanded)}
+          onClick={() =>
+            props.onQueryChange(
+              leanCloneThen(
+                props.query,
+                (query) => (query.expanded = !query.expanded)
+              )
+            )
+          }
         >
-          {props.expanded ? "⯆" : "⯈"}
+          {props.query.expanded ? "⯆" : "⯈"}
         </button>
 
         <div className="w-6"></div>
 
         <button
-          onClick={() => props.onToggleEnabled(!props.enabled)}
+          onClick={() =>
+            props.onQueryChange(
+              leanCloneThen(
+                props.query,
+                (query) => (query.enabled = !query.enabled)
+              )
+            )
+          }
           className="p-1 border border-black rounded-md bg-neutral-300"
         >
-          {props.enabled ? "Enabled" : "Disabled"}
+          {props.query.enabled ? "Enabled" : "Disabled"}
         </button>
 
         <div className="w-6"></div>
@@ -64,8 +73,15 @@ const Query = memo(function Query(props: {
 
         <input
           type="text"
-          value={props.title}
-          onChange={(event) => props.onTitleChange(event.target.value)}
+          value={props.query.title}
+          onChange={(event) =>
+            props.onQueryChange(
+              leanCloneThen(
+                props.query,
+                (query) => (query.title = event.target.value)
+              )
+            )
+          }
           className="p-1 border border-black rounded-md bg-neutral-300"
         />
 
@@ -79,10 +95,17 @@ const Query = memo(function Query(props: {
         </button>
       </div>
 
-      {props.expanded && (
+      {props.query.expanded && (
         <textarea
-          value={props.value}
-          onChange={(event) => props.onValueChange(event.target.value)}
+          value={props.query.value}
+          onChange={(event) =>
+            props.onQueryChange(
+              leanCloneThen(
+                props.query,
+                (query) => (query.value = event.target.value)
+              )
+            )
+          }
           className="h-48 p-1 border border-black rounded-md resize-none bg-neutral-300"
         ></textarea>
       )}

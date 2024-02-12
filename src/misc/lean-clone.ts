@@ -44,12 +44,29 @@ export function leanClone<T extends object>(
   return clonedRoot;
 }
 
+export function leanCloneThen<Obj extends object>(
+  obj: Obj,
+  func: (targetObj: Obj, obj: Obj) => void
+): Obj;
 export function leanCloneThen<
   Obj extends object,
   Path extends NestedObjPaths<Obj> | [],
   TargetObj extends NestedValueType<Obj, Path>
->(obj: Obj, path: Path, func: (targetObj: TargetObj, obj: Obj) => void): Obj {
-  const clonedObj = leanClone(obj, path as any);
+>(obj: Obj, path: Path, func: (targetObj: TargetObj, obj: Obj) => void): Obj;
+export function leanCloneThen<
+  Obj extends object,
+  Path extends NestedObjPaths<Obj> | [],
+  TargetObj extends NestedValueType<Obj, Path>
+>(
+  obj: Obj,
+  path: Path | ((targetObj: TargetObj, obj: Obj) => void),
+  func?: (targetObj: TargetObj, obj: Obj) => void
+): Obj {
+  if (typeof path === "function") {
+    return leanCloneThen(obj, [], path as any);
+  }
+
+  const clonedObj = leanClone(obj, path);
 
   let currentObj: any = clonedObj;
 
@@ -57,7 +74,7 @@ export function leanCloneThen<
     currentObj = currentObj[path[i]];
   }
 
-  func(currentObj, clonedObj);
+  func?.(currentObj, clonedObj);
 
   return clonedObj;
 }

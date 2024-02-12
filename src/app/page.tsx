@@ -2,6 +2,7 @@
 
 import { Api } from "@/app-specific/api";
 import { useAppIndexedDB } from "@/app-specific/use-app-indexeddb";
+import ApiForm from "@/components/ApiForm";
 import Query, { IQuery } from "@/components/Query";
 import { leanClone, leanCloneThen } from "@/misc/lean-clone";
 import { swap } from "@/misc/swap";
@@ -183,7 +184,7 @@ export default function Home() {
             <button
               onClick={() => {
                 setQueries(
-                  leanCloneThen(queries, [], (queries) =>
+                  leanCloneThen(queries, (queries) =>
                     queries.push({
                       id: crypto.randomUUID(),
                       title: "",
@@ -203,53 +204,22 @@ export default function Home() {
           {queries.map((query, index) => (
             <Query
               key={query.id}
-              title={query.title}
-              expanded={query.expanded}
-              enabled={query.enabled}
-              value={query.value}
-              onTitleChange={(title) => {
+              query={query}
+              onQueryChange={(newQuery) =>
                 setQueries(
                   leanCloneThen(
                     queries,
-                    [index],
-                    (query) => (query.title = title)
+                    (queries) => (queries[index] = newQuery)
                   )
-                );
-              }}
-              onValueChange={(value) => {
-                setQueries(
-                  leanCloneThen(
-                    queries,
-                    [index],
-                    (query) => (query.value = value)
-                  )
-                );
-              }}
-              onToggleExpanded={(expanded) => {
-                setQueries(
-                  leanCloneThen(
-                    queries,
-                    [index],
-                    (query) => (query.expanded = expanded)
-                  )
-                );
-              }}
-              onToggleEnabled={(enabled) => {
-                setQueries(
-                  leanCloneThen(
-                    queries,
-                    [index],
-                    (query) => (query.enabled = enabled)
-                  )
-                );
-              }}
+                )
+              }
               onMoveUp={() => {
                 if (index === 0) {
                   return;
                 }
 
                 setQueries(
-                  leanCloneThen(queries, [], (queries) =>
+                  leanCloneThen(queries, (queries) =>
                     swap(queries, index, index - 1)
                   )
                 );
@@ -260,7 +230,7 @@ export default function Home() {
                 }
 
                 setQueries(
-                  leanCloneThen(queries, [], (queries) =>
+                  leanCloneThen(queries, (queries) =>
                     swap(queries, index, index + 1)
                   )
                 );
@@ -271,9 +241,7 @@ export default function Home() {
                 }
 
                 setQueries(
-                  leanCloneThen(queries, [], (queries) =>
-                    queries.splice(index, 1)
-                  )
+                  leanCloneThen(queries, (queries) => queries.splice(index, 1))
                 );
               }}
             />
@@ -295,104 +263,26 @@ export default function Home() {
         <hr />
 
         <div className="p-4 flex flex-col">
-          <div className="flex flex-col">
-            <div>API:</div>
+          <ApiForm
+            apis={apis}
+            apiIndex={apiIndex}
+            onApisChange={(newApis) => setApis(newApis)}
+            onApiIndexChange={(newApiIndex) => setApiIndex(newApiIndex)}
+          />
+        </div>
 
-            <select
-              className="p-1 border border-black rounded-md bg-neutral-300"
-              value={apiIndex}
-              onChange={(event) => setApiIndex(parseInt(event.target.value))}
-            >
-              {apis.map((api, index) => (
-                <option key={index} value={index}>
-                  {api.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <hr />
 
-          <div className="h-2"></div>
-
-          <div className="flex flex-col">
-            <div>API URL:</div>
-
-            <input
-              type="text"
-              value={apis[apiIndex].url}
-              onChange={(event) => {
-                setApis(
-                  leanCloneThen(
-                    apis,
-                    [apiIndex],
-                    (api) => (api.url = event.target.value)
-                  )
-                );
-              }}
-              className="p-1 border border-black rounded-md resize-none bg-neutral-300"
-            />
-          </div>
-
-          <div className="h-2"></div>
-
-          <div className="flex flex-col">
-            <div>API key:</div>
-
-            <input
-              type="password"
-              value={apis[apiIndex].key}
-              onChange={(event) => {
-                setApis(
-                  leanCloneThen(
-                    apis,
-                    [apiIndex],
-                    (api) => (api.key = event.target.value)
-                  )
-                );
-              }}
-              placeholder={`Generate your ${apis[apiIndex].name} API key and paste it here.`}
-              className="p-1 border border-black rounded-md resize-none bg-neutral-300"
-            />
-          </div>
-
-          <div className="h-2"></div>
-
-          <div className="flex flex-col">
-            <div>Model:</div>
-
-            <select
-              className="p-1 border border-black rounded-md bg-neutral-300"
-              value={apis[apiIndex].selectedModel}
-              onChange={(event) => {
-                setApis(
-                  leanCloneThen(
-                    apis,
-                    [apiIndex],
-                    (api) => (api.selectedModel = event.target.value)
-                  )
-                );
-              }}
-            >
-              {apis[apiIndex].models.map((model, index) => (
-                <option key={index} value={model}>
-                  {model}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="h-6"></div>
-
+        <div className="p-4 flex flex-col">
           <button
             className="p-2 bg-neutral-300 rounded-md"
             onClick={processSheet}
           >
             Extract insights
           </button>
-        </div>
 
-        <hr />
+          <div className="h-6"></div>
 
-        <div className="p-4 flex flex-col">
           <div>Result{progress ? ` (${progress})` : ""}:</div>
 
           <textarea
